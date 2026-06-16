@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🎭 Facial Expression Recognition
 
 A full-stack, real-time facial expression recognition web app built with **Transfer Learning**. Point a webcam or upload a photo, and a MobileNetV2-based deep learning model — fine-tuned on the FER2013 dataset — detects faces and classifies the emotion being expressed across 7 categories.
