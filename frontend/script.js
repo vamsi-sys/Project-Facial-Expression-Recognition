@@ -11,7 +11,7 @@
 //     For local testing leave it as "http://localhost:8000"
 // ─────────────────────────────────────────────────────────────────────────────
 const CONFIG = {
-  API_BASE_URL: "http://localhost:8000",
+  API_BASE_URL: "https://project-facial-expression-recognition.onrender.com",
   CAPTURE_INTERVAL_MS: 1500,
 };
 
