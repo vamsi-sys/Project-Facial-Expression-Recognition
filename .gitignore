@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+venv/
+FER/
+.env
+*.log
+.DS_Store
+.vscode/
+
+# Ignore the virtual environment folder
+backend/FER/
+
+# DO NOT ignore models/*.keras or labels.json — backend needs them committed

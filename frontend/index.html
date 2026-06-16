@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mood Lab — Facial Expression Recognition</title>
+  <meta name="description" content="Live, in-browser facial expression recognition powered by a MobileNetV2 transfer-learning model." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="safelight-glow" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <p class="eyebrow">EXPRESSION LAB · LIVE ANALYSIS</p>
+    <h1>Read the room.</h1>
+    <p class="lede">
+      Point your camera or drop in a photo. A MobileNetV2 model,
+      fine-tuned with transfer learning on FER2013, reads the expression
+      and develops the result like an instant photo.
+    </p>
+  </header>
+
+  <main>
+    <!-- ========== MODE SELECTION ========== -->
+    <section id="mode-select" class="mode-select" aria-label="Choose an input mode">
+      <button class="mode-card" id="open-camera-btn" type="button">
+        <span class="mode-icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="12" width="40" height="28" rx="4" stroke="currentColor" stroke-width="2.5"/>
+            <circle cx="24" cy="26" r="8" stroke="currentColor" stroke-width="2.5"/>
+            <rect x="17" y="6" width="10" height="6" rx="1.5" fill="currentColor"/>
+          </svg>
+        </span>
+        <span class="mode-title">Live Camera</span>
+        <span class="mode-desc">Real-time reads from your webcam, refreshed every couple of seconds.</span>
+        <span class="mode-cta">Open camera →</span>
+      </button>
+
+      <button class="mode-card" id="open-upload-btn" type="button">
+        <span class="mode-icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="5" y="7" width="38" height="34" rx="3" stroke="currentColor" stroke-width="2.5"/>
+            <circle cx="17" cy="18" r="3.5" stroke="currentColor" stroke-width="2.5"/>
+            <path d="M8 33L18 23L26 31L33 24L41 32" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="mode-title">Upload a Photo</span>
+        <span class="mode-desc">Drop in an image or screenshot and get an instant read.</span>
+        <span class="mode-cta">Choose photo →</span>
+      </button>
+    </section>
+
+    <!-- ========== CAMERA VIEW ========== -->
+    <section id="camera-view" class="active-view hidden" aria-label="Live camera mode">
+      <button class="back-btn" data-back type="button">← Back to modes</button>
+      <h2>Live Camera</h2>
+      <div class="viewfinder" id="camera-viewfinder">
+        <video id="video" autoplay muted playsinline></video>
+        <p class="viewfinder-placeholder" id="camera-placeholder">Camera is off</p>
+        <span class="corner tl" aria-hidden="true"></span>
+        <span class="corner tr" aria-hidden="true"></span>
+        <span class="corner bl" aria-hidden="true"></span>
+        <span class="corner br" aria-hidden="true"></span>
+      </div>
+      <div class="controls">
+        <button id="camera-toggle-btn" class="shutter-btn" type="button">Start camera</button>
+        <p id="camera-status" class="status-text" role="status"></p>
+      </div>
+    </section>
+
+    <!-- ========== UPLOAD VIEW ========== -->
+    <section id="upload-view" class="active-view hidden" aria-label="Upload photo mode">
+      <button class="back-btn" data-back type="button">← Back to modes</button>
+      <h2>Upload a Photo</h2>
+      <div class="viewfinder" id="dropzone">
+        <img id="preview-img" alt="Uploaded preview" hidden />
+        <div class="viewfinder-placeholder" id="upload-placeholder">
+          <p>Drag &amp; drop an image here</p>
+          <label for="file-input" class="file-label">or browse files</label>
+        </div>
+        <input type="file" id="file-input" accept="image/*" hidden />
+        <span class="corner tl" aria-hidden="true"></span>
+        <span class="corner tr" aria-hidden="true"></span>
+        <span class="corner bl" aria-hidden="true"></span>
+        <span class="corner br" aria-hidden="true"></span>
+      </div>
+      <div class="controls">
+        <button id="analyze-btn" class="shutter-btn" type="button" disabled>Analyze photo</button>
+        <p id="upload-status" class="status-text" role="status"></p>
+      </div>
+    </section>
+
+    <!-- ========== RESULTS ========== -->
+    <section id="results" class="results hidden" aria-label="Analysis results" aria-live="polite"></section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Transfer learning: MobileNetV2 (ImageNet) fine-tuned on FER2013 · Backend: FastAPI + OpenCV · Frontend: vanilla HTML/CSS/JS</p>
+  </footer>
+
+  <canvas id="capture-canvas" hidden></canvas>
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: mood-lab-api
+    runtime: docker
+    rootDir: backend
+    plan: free
+    healthCheckPath: /

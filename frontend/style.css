@@ -1,0 +1,547 @@
+/* ==========================================================================
+   MOOD LAB — Facial Expression Recognition
+   Design concept: a "darkroom" — a dark, warm-glow workspace where
+   captured frames develop into instant-photo (polaroid) result cards.
+   ========================================================================== */
+
+:root {
+  /* Darkroom surfaces */
+  --color-bg: #1a1f2b;
+  --color-bg-alt: #232a3b;
+  --color-border: #343c52;
+
+  /* Instant-photo paper */
+  --color-paper: #fbf7ef;
+  --color-ink: #1a1f2b;
+
+  /* Accents */
+  --color-accent: #ff7a59;     /* flash / primary action */
+  --color-safelight: #ffb84d;  /* amber safelight glow */
+  --color-muted: #8a93a6;
+
+  /* Emotion palette (used for bars / badges) */
+  --emotion-happy: #ffc857;
+  --emotion-sad: #5b8def;
+  --emotion-angry: #e8505b;
+  --emotion-surprise: #c58af9;
+  --emotion-fear: #3fa796;
+  --emotion-disgust: #9cb52b;
+  --emotion-neutral: #8a93a6;
+
+  /* Type */
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* --------------------------------------------------------------------- */
+/* Reset & base                                                            */
+/* --------------------------------------------------------------------- */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  color: var(--color-paper);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-safelight);
+  outline-offset: 2px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Ambient amber "safelight" glow behind the whole page */
+.safelight-glow {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 50% -10%, rgba(255, 184, 77, 0.16), transparent 55%),
+    radial-gradient(circle at 100% 100%, rgba(255, 122, 89, 0.08), transparent 50%),
+    var(--color-bg);
+}
+
+/* --------------------------------------------------------------------- */
+/* Header                                                                  */
+/* --------------------------------------------------------------------- */
+.site-header {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 64px 24px 40px;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  letter-spacing: 0.2em;
+  font-size: 0.75rem;
+  color: var(--color-safelight);
+  text-transform: uppercase;
+  margin: 0 0 16px;
+}
+
+.site-header h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 700;
+  color: var(--color-paper);
+  margin: 0 0 16px;
+  letter-spacing: -0.02em;
+}
+
+.lede {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  color: var(--color-muted);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------- */
+/* Layout                                                                  */
+/* --------------------------------------------------------------------- */
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  padding: 0 24px 80px;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.active-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+h2 {
+  font-family: var(--font-display);
+  color: var(--color-paper);
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin: 0 0 24px;
+  text-align: center;
+}
+
+/* --------------------------------------------------------------------- */
+/* Mode selection cards                                                    */
+/* --------------------------------------------------------------------- */
+.mode-select {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.mode-card {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  border: none;
+  border-radius: 16px;
+  padding: 32px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-family: var(--font-body);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.mode-card:hover,
+.mode-card:focus-visible {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 36px rgba(255, 184, 77, 0.22), 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.mode-icon {
+  color: var(--color-accent);
+  width: 44px;
+  height: 44px;
+}
+
+.mode-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.mode-title {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.mode-desc {
+  color: #5b5f6e;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.mode-cta {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--color-accent);
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+/* --------------------------------------------------------------------- */
+/* Viewfinder (camera + upload share this)                                */
+/* --------------------------------------------------------------------- */
+.viewfinder {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  aspect-ratio: 4 / 3;
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.viewfinder video,
+.viewfinder img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.viewfinder-placeholder {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  color: var(--color-muted);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  padding: 0 24px;
+}
+
+.viewfinder-placeholder p {
+  margin: 0 0 8px;
+}
+
+/* Camera-style corner brackets */
+.corner {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--color-safelight);
+  opacity: 0.7;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.corner.tl { top: 12px; left: 12px; border-right: none; border-bottom: none; border-radius: 4px 0 0 0; }
+.corner.tr { top: 12px; right: 12px; border-left: none; border-bottom: none; border-radius: 0 4px 0 0; }
+.corner.bl { bottom: 12px; left: 12px; border-right: none; border-top: none; border-radius: 0 0 0 4px; }
+.corner.br { bottom: 12px; right: 12px; border-left: none; border-top: none; border-radius: 0 0 4px 0; }
+
+/* Dropzone drag-over state */
+#dropzone.dragover {
+  border-color: var(--color-accent);
+  background: rgba(255, 122, 89, 0.08);
+}
+
+.file-label {
+  color: var(--color-accent);
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------- */
+/* Controls                                                                */
+/* --------------------------------------------------------------------- */
+.controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.shutter-btn {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 14px 36px;
+  border-radius: 999px;
+  border: 2px solid var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-bg);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.1s ease;
+}
+
+.shutter-btn:hover:not(:disabled) {
+  background: transparent;
+  color: var(--color-accent);
+}
+
+.shutter-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.shutter-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  border-color: var(--color-muted);
+  background: var(--color-muted);
+  color: var(--color-bg);
+}
+
+.back-btn {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: var(--color-safelight);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin-bottom: 16px;
+  padding: 4px 0;
+}
+
+.back-btn:hover {
+  text-decoration: underline;
+}
+
+.status-text {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  min-height: 1.2em;
+  text-align: center;
+}
+
+/* --------------------------------------------------------------------- */
+/* Results — instant-photo (polaroid) cards                                */
+/* --------------------------------------------------------------------- */
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 640px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.results-heading {
+  font-family: var(--font-mono);
+  letter-spacing: 0.15em;
+  font-size: 0.75rem;
+  color: var(--color-safelight);
+  text-transform: uppercase;
+  text-align: center;
+  margin: 0;
+}
+
+.polaroid {
+  background: var(--color-paper);
+  border-radius: 10px;
+  padding: 14px 14px 22px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+  animation: develop 0.7s ease-out;
+}
+
+.polaroid .photo-frame {
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #000;
+  aspect-ratio: 4 / 3;
+}
+
+.polaroid .photo-frame canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.caption {
+  margin-top: 16px;
+  color: var(--color-ink);
+}
+
+.emotion-readout {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.emoji {
+  font-size: 2.4rem;
+  line-height: 1;
+  display: inline-block;
+  animation: stamp-in 0.5s ease-out 0.25s both;
+}
+
+.emotion-name {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.confidence {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  color: var(--color-muted);
+  margin-left: auto;
+}
+
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 76px 1fr 48px;
+  align-items: center;
+  gap: 10px;
+}
+
+.bar-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-ink);
+}
+
+.bar-track {
+  background: #e8e2d6;
+  border-radius: 4px;
+  height: 10px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  width: 0%;
+  transition: width 0.6s ease;
+}
+
+.bar-value {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-align: right;
+  color: var(--color-muted);
+}
+
+/* Emotion color tokens applied to bar fills */
+.bar-fill.happy     { background: var(--emotion-happy); }
+.bar-fill.sad       { background: var(--emotion-sad); }
+.bar-fill.angry     { background: var(--emotion-angry); }
+.bar-fill.surprise  { background: var(--emotion-surprise); }
+.bar-fill.fear      { background: var(--emotion-fear); }
+.bar-fill.disgust   { background: var(--emotion-disgust); }
+.bar-fill.neutral   { background: var(--emotion-neutral); }
+
+.empty-state {
+  background: var(--color-bg-alt);
+  border: 1px dashed var(--color-border);
+  border-radius: 12px;
+  padding: 28px;
+  text-align: center;
+  color: var(--color-muted);
+  font-family: var(--font-body);
+  line-height: 1.6;
+}
+
+/* --------------------------------------------------------------------- */
+/* Footer                                                                  */
+/* --------------------------------------------------------------------- */
+.site-footer {
+  text-align: center;
+  padding: 24px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--color-muted);
+  border-top: 1px solid var(--color-border);
+  line-height: 1.6;
+}
+
+/* --------------------------------------------------------------------- */
+/* Animations                                                              */
+/* --------------------------------------------------------------------- */
+@keyframes develop {
+  from {
+    opacity: 0;
+    filter: blur(10px) brightness(1.4);
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0) brightness(1);
+    transform: scale(1);
+  }
+}
+
+@keyframes stamp-in {
+  0% {
+    transform: scale(2.2) rotate(-14deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(0.9) rotate(6deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(-4deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .polaroid,
+  .emoji {
+    animation: none !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* --------------------------------------------------------------------- */
+/* Responsive                                                              */
+/* --------------------------------------------------------------------- */
+@media (max-width: 720px) {
+  .mode-select {
+    grid-template-columns: 1fr;
+  }
+
+  .site-header {
+    padding: 48px 20px 32px;
+  }
+
+  .bar-row {
+    grid-template-columns: 64px 1fr 42px;
+  }
+}
